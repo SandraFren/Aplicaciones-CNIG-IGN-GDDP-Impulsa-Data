@@ -182,7 +182,7 @@ with st.spinner("📘 Cargando Shapes SHACL..."):
         carpetas = [seleccion]
 
     for carpeta in carpetas:
-        ruta_carpeta = os.path.join(BASE_DIR, carpeta)
+        ruta_carpeta = os.path.join(BASE_DIR_SHACL, carpeta)
 
         for archivo in os.listdir(ruta_carpeta):
             if archivo.endswith(".ttl"):
