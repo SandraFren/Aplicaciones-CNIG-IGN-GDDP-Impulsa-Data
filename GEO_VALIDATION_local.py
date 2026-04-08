@@ -212,7 +212,7 @@ if st.session_state["run_validation"]:
     # ------------------------------------------------------------
     # MOSTRAR RESULTADOS (siempre, usando sesión)
     # ------------------------------------------------------------
-    results = st.session_state["results"]
+    results = st.session_state.get("results", [])
 
     # Resumen global
     resumen_global = {"rdf": [], "errores": 0, "warnings": 0}
