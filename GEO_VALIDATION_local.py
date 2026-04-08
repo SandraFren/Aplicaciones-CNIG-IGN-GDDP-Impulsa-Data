@@ -268,12 +268,27 @@ if st.session_state["run_validation"]:
     # ------------------------------------------------------------
     st.markdown("---")
     st.header("🎛️ Filtro de Severidad")
-    filtro_severidad = st.multiselect(
-        "Mostrar resultados con severidad:",
-        ["ERROR", "WARNING", "INFO"],
-        default=["ERROR", "WARNING", "INFO"]
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("Todos"):
+            st.session_state["filtro"] = ["ERROR", "WARNING", "INFO"]    
+    with col2:
+        if st.button("❌ Errores"):
+            st.session_state["filtro"] = ["ERROR"]    
+    with col3:
+        if st.button("⚠️ Warnings"):
+            st.session_state["filtro"] = ["WARNING"]    
+    with col4:
+        if st.button("ℹ️ Info"):
+            st.session_state["filtro"] = ["INFO"]
+        )
+        
+    filtro_severidad = st.session_state.get(
+    "filtro",
+    ["ERROR", "WARNING", "INFO"]
     )
-
     # ------------------------------------------------------------
     # RESULTADOS DETALLADOS POR RDF
     # ------------------------------------------------------------
