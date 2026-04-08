@@ -125,7 +125,8 @@ with top2:
     reset = st.button("🔄 Reset")
 
 if reset:
-    st.session_state["run_validation"] = False and  st.session_state["results"] = None
+    st.session_state["run_validation"] = False
+    st.session_state["results"] = None
     for key in list(st.session_state.keys()):
         if key not in ["run_validation", "file_uploader_counter"]:
             del st.session_state[key]
@@ -148,8 +149,6 @@ opcion_validacion = st.selectbox(
     "Elige un conjunto de validaciones:",
     list(VALIDACIONES.keys())
 )
-
-run_validation = st.button("🚀 Ejecutar validación")
 
 if st.button("🚀 Ejecutar validación"):
     st.session_state["run_validation"] = True
