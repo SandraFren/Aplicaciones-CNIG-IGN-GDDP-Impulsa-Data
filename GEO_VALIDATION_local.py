@@ -401,7 +401,10 @@ if st.session_state["run_validation"]:
             else:
                 df_tipo.index += 1
                 st.dataframe(df_tipo, use_container_width=True)
-                        clases_disponibles = sorted(errores_por_clase.keys())
+            
+            
+            clases_disponibles = sorted(errores_por_clase.keys())
+            
             st.markdown("---")
             st.header("🎛️ Filtro por Clase")
             
@@ -409,9 +412,9 @@ if st.session_state["run_validation"]:
                 "Selecciona una clase:",
                 ["Todas"] + clases_disponibles
             )
-            
+                
             st.subheader("📋 Detalle de Errores por Clase")
-            
+                
 
             if clase_seleccionada == "Todas":
                 clases_a_mostrar = errores_por_clase.items()
