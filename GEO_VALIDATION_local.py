@@ -266,12 +266,8 @@ if st.session_state["run_validation"]:
     st.markdown("---")
     st.header("🎛️ Filtro de Severidad")
     
-    filtro = st.radio(
-        "Filtrar por:",
-        ["Todos", "Solo errores", "Solo warnings", "Solo info"]
-    )
-    
-    # 🔥 INICIALIZACIÓN DEL FILTRO (CLAVE)
+
+    # 🔥 INICIALIZACIÓN DEL FILTRO 
     if "filtro_severidad" not in st.session_state:
         st.session_state["filtro_severidad"] = ["ERROR", "WARNING", "INFO"]
     
