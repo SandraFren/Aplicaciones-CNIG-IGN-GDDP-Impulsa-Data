@@ -256,11 +256,6 @@ if st.session_state["run_validation"]:
     df_resumen_rdf.index += 1
     st.dataframe(df_resumen_rdf, width='content')
 
-    # Métricas globales
-    col1, col2, col3 = st.columns(3)
-    col1.metric("❌ Errores SHACL", resumen_global["errores"])
-    col2.metric("⚠️ Warnings SHACL", resumen_global["warnings"])
-    col3.metric("📄 RDF validados", len(resumen_global["rdf"]))
 
     # ------------------------------------------------------------
     # FILTRO DE SEVERIDAD
