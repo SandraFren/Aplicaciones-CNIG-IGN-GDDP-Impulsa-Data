@@ -262,31 +262,31 @@ if st.session_state["run_validation"]:
     # ------------------------------------------------------------
     # FILTRO DE SEVERIDAD
     # ------------------------------------------------------------
-        st.markdown("---")
-        st.header("🎛️ Filtro de Severidad")
-        
-        filtro = st.radio(
-            "Filtrar por:",
-            ["Todos", "Solo errores", "Solo warnings", "Solo info"]
-        )
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            if st.button("Todos"):
-                st.session_state["filtro_severidad"] = ["ERROR", "WARNING", "INFO"]
-        
-        with col2:
-            if st.button("❌ Errores"):
-                st.session_state["filtro_severidad"] = ["ERROR"]
-        
-        with col3:
-            if st.button("⚠️ Warnings"):
-                st.session_state["filtro_severidad"] = ["WARNING"]
-        
-        with col4:
-            if st.button("ℹ️ Info"):
-                st.session_state["filtro_severidad"] = ["INFO"]
+    st.markdown("---")
+    st.header("🎛️ Filtro de Severidad")
+    
+    filtro = st.radio(
+        "Filtrar por:",
+        ["Todos", "Solo errores", "Solo warnings", "Solo info"]
+    )
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("Todos"):
+            st.session_state["filtro_severidad"] = ["ERROR", "WARNING", "INFO"]
+    
+    with col2:
+        if st.button("❌ Errores"):
+            st.session_state["filtro_severidad"] = ["ERROR"]
+    
+    with col3:
+        if st.button("⚠️ Warnings"):
+            st.session_state["filtro_severidad"] = ["WARNING"]
+    
+    with col4:
+        if st.button("ℹ️ Info"):
+            st.session_state["filtro_severidad"] = ["INFO"]
 🔧
     #-----------------------------------------------------------
     # RESULTADOS DETALLADOS POR RDF
