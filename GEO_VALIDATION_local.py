@@ -125,8 +125,7 @@ with top2:
     reset = st.button("🔄 Reset")
 
 if reset:
-    st.session_state["run_validation"] = False
-    st.session_state["results"] = None
+    st.session_state["run_validation"] = False and  st.session_state["results"] = None
     for key in list(st.session_state.keys()):
         if key not in ["run_validation", "file_uploader_counter"]:
             del st.session_state[key]
@@ -152,44 +151,47 @@ opcion_validacion = st.selectbox(
 
 run_validation = st.button("🚀 Ejecutar validación")
 
-if run_validation:
+if st.button("🚀 Ejecutar validación"):
     st.session_state["run_validation"] = True
+    st.session_state["results"] = None
 
 # ------------------------------------------------------------
 # VALIDACIÓN (solo si fue solicitada)
 # ------------------------------------------------------------
-if st.session_state["run_validation"] and st.session_state["results"] is None:
+if st.session_state["run_validation"]:
 
-    # Guardar resultados solo si no están ya en sesión
-    if "results" not in st.session_state:
+    if not DATA_FILE:
+        st.warning("⚠️ Debes subir RDF antes de validar")
+        st.stop()
 
-        if not DATA_FILE:
-            st.warning("⚠️ Debes subir RDF y Shapes antes de validar")
-            st.stop()
+    # Solo ejecutar si aún no hay resultados
+    if st.session_state["results"] is None:
 
+        # Cargar shapes desde carpetas
+        shapes_graph = Graph()
 
+        with st.spinner("📘 Cargando Shapes SHACL..."):
 
-# Cargar shapes desde carpetas github
-shapes_graph = Graph()
+            seleccion = VALIDACIONES[opcion_validacion]
 
-with st.spinner("📘 Cargando Shapes SHACL..."):
+            if isinstance(seleccion, list):
+                carpetas = seleccion
+            else:
+                carpetas = [seleccion]
 
-    seleccion = VALIDACIONES[opcion_validacion]
+            for carpeta in carpetas:
+                ruta_carpeta = os.path.join(BASE_DIR_SHACL, carpeta)
 
-    # Convertir a lista si es solo una carpeta
-    if isinstance(seleccion, list):
-        carpetas = seleccion
-    else:
-        carpetas = [seleccion]
+                if not os.path.exists(ruta_carpeta):
+                    st.error(f"❌ No existe la carpeta: {ruta_carpeta}")
+                    st.stop()
 
-    for carpeta in carpetas:
-        ruta_carpeta = os.path.join(BASE_DIR_SHACL, carpeta)
+                for archivo in os.listdir(ruta_carpeta):
+                    if archivo.endswith(".ttl"):
+                        ruta = os.path.join(ruta_carpeta, archivo)
+                        shapes_graph.parse(ruta, format="turtle")
 
-        for archivo in os.listdir(ruta_carpeta):
-            if archivo.endswith(".ttl"):
-                ruta = os.path.join(ruta_carpeta, archivo)
-                shapes_graph.parse(ruta, format="turtle")
-        # Validar secuencialmente con barra de progreso
+        # Validación
         results = []
         progress = st.progress(0, text="⏳ Iniciando validación...")
         total = len(DATA_FILE)
