@@ -2,3 +2,4 @@ rdflib
 pyshacl
 streamlit
 pandas
+matplotlib
