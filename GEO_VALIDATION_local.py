@@ -236,8 +236,7 @@ if st.session_state["run_validation"]:
         if errores == 0:
             estado = "✅ CUMPLE"
         else:
-            estado = "❌ NO CUMPLE"
-            
+            estado = "❌ NO CUMPLE"            
             
         resumen_rdf.append({
             "RDF": rdf_name,
@@ -268,33 +267,43 @@ if st.session_state["run_validation"]:
     # ------------------------------------------------------------
     st.markdown("---")
     st.header("🎛️ Filtro de Severidad")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        if st.button("Todos"):
-            st.session_state["filtro"] = ["ERROR", "WARNING", "INFO"]    
-    with col2:
-        if st.button("❌ Errores"):
-            st.session_state["filtro"] = ["ERROR"]    
-    with col3:
-        if st.button("⚠️ Warnings"):
-            st.session_state["filtro"] = ["WARNING"]    
-    with col4:
-        if st.button("ℹ️ Info"):
-            st.session_state["filtro"] = ["INFO"]
-        )
-        
-    filtro_severidad = st.session_state.get(
-    "filtro",
-    ["ERROR", "WARNING", "INFO"]
+
+    filtro = st.radio(
+        "Filtrar por:",
+        ["Todos", "Solo errores", "Solo warnings", "Solo info"]
     )
-    # ------------------------------------------------------------
+    
+    if filtro == "Todos":
+        filtro_severidad = ["ERROR", "WARNING", "INFO"]
+    elif filtro == "Solo errores":
+        filtro_severidad = ["ERROR"]
+    elif filtro == "Solo warnings":
+        filtro_severidad = ["WARNING"]
+    else:
+        filtro_severidad = ["INFO"]
+
+    #-----------------------------------------------------------
     # RESULTADOS DETALLADOS POR RDF
     # ------------------------------------------------------------
     for rdf_name, resultado in results:
         data_graph, report_graph, conforms = resultado
-
+    
+        # 👇 AÑADIR ESTO
+        errores = 0
+        warnings = 0
+    
+        for r in report_graph.subjects(RDF.type, SH.ValidationResult):
+            severity = report_graph.value(r, SH.resultSeverity)
+            if severity == SH.Violation:
+                errores += 1
+            elif severity == SH.Warning:
+                warnings += 1
+    
+        if errores == 0:
+            estado = "✅ CUMPLE"
+        else:
+           estado = "❌ NO CUMPLE"
+            
         st.markdown("---")
         with st.expander(
             f"📂 {rdf_name} — {estado}",
