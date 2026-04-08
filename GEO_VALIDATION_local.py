@@ -10,7 +10,7 @@ import streamlit as st
 import pandas as pd
 import os
 # ------------------------------------------------------------
-# CONSTANTES
+# MAPEO CONSTANTES (DICCIONARIOS)
 # ------------------------------------------------------------
 FORMAT_MAP = {
     ".ttl": "turtle",
@@ -155,7 +155,7 @@ if st.button("🚀 Ejecutar validación"):
     st.session_state["results"] = None
 
 # ------------------------------------------------------------
-# VALIDACIÓN (solo si fue solicitada)
+# VALIDACIÓN (solo se ejecuta cuando se da al botón)
 # ------------------------------------------------------------
 if st.session_state["run_validation"]:
 
@@ -210,7 +210,7 @@ if st.session_state["run_validation"]:
         st.session_state["shapes_graph"] = shapes_graph
 
     # ------------------------------------------------------------
-    # MOSTRAR RESULTADOS (siempre, usando sesión)
+    # MOSTRAR RESULTADOS (siempre, usando sesión, se almacenan en el cache)
     # ------------------------------------------------------------
     results = st.session_state.get("results", [])
 
@@ -233,9 +233,15 @@ if st.session_state["run_validation"]:
                 errores += 1
             elif severity == SH.Warning:
                 warnings += 1
-
+        if errores == 0:
+            estado = "✅ CUMPLE"
+        else:
+            estado = "❌ NO CUMPLE"
+            
+            
         resumen_rdf.append({
             "RDF": rdf_name,
+            "Estado": estado,
             "Errores": errores,
             "Warnings": warnings,
             "Metadatos únicos afectados": len(metadatos_unicos)
@@ -276,7 +282,7 @@ if st.session_state["run_validation"]:
 
         st.markdown("---")
         with st.expander(
-            f"📂 {rdf_name} — {'✅ CUMPLE' if conforms else '❌ NO CUMPLE'}",
+            f"📂 {rdf_name} — {estado}",
             expanded=True
         ):
             # Descarga TTL
