@@ -260,6 +260,7 @@ if st.session_state["run_validation"]:
 
 
     # ------------------------------------------------------------
+    # ------------------------------------------------------------
     # FILTRO DE SEVERIDAD
     # ------------------------------------------------------------
     st.markdown("---")
@@ -269,6 +270,10 @@ if st.session_state["run_validation"]:
         "Filtrar por:",
         ["Todos", "Solo errores", "Solo warnings", "Solo info"]
     )
+    
+    # 🔥 INICIALIZACIÓN DEL FILTRO (CLAVE)
+    if "filtro_severidad" not in st.session_state:
+        st.session_state["filtro_severidad"] = ["ERROR", "WARNING", "INFO"]
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -287,14 +292,14 @@ if st.session_state["run_validation"]:
     with col4:
         if st.button("ℹ️ Info"):
             st.session_state["filtro_severidad"] = ["INFO"]
-🔧
-    #-----------------------------------------------------------
+    
+    
+    # ------------------------------------------------------------
     # RESULTADOS DETALLADOS POR RDF
     # ------------------------------------------------------------
     for rdf_name, resultado in results:
         data_graph, report_graph, conforms = resultado
     
-        # 👇 AÑADIR ESTO
         errores = 0
         warnings = 0
     
@@ -308,75 +313,71 @@ if st.session_state["run_validation"]:
         if errores == 0:
             estado = "✅ CUMPLE"
         else:
-           estado = "❌ NO CUMPLE"
-            
+            estado = "❌ NO CUMPLE"
+    
         st.markdown("---")
         with st.expander(
             f"📂 {rdf_name} — {estado}",
             expanded=True
         ):
-            # Descarga TTL
-            try:
-                ttl = report_graph.serialize(format="turtle")
-                if isinstance(ttl, bytes):
-                    ttl = ttl.decode("utf-8")
-
-                st.download_button(
-                    f"⬇️ Descargar TTL ({rdf_name})",
-                    ttl,
-                    f"validation_report_{rdf_name}.ttl",
-                    "text/turtle"
-                )
-                with st.expander("📄 Ver reporte TTL"):
-                    st.code(ttl, language="turtle")
-            except Exception as e:
-                st.warning(f"No se pudo generar TTL: {e}")
-
-            # Parseo de errores
+    
+            # --------------------------------------------------------
+            # PARSEO DE ERRORES
+            # --------------------------------------------------------
             errores_por_clase = defaultdict(list)
             resumen_path = defaultdict(int)
             resumen_tipo = defaultdict(lambda: {"total": 0, "paths": set()})
-            
+    
             for r in report_graph.subjects(RDF.type, SH.ValidationResult):
+    
                 focus = report_graph.value(r, SH.focusNode)
                 path = report_graph.value(r, SH.resultPath)
                 value = report_graph.value(r, SH.value)
                 message = report_graph.value(r, SH.resultMessage)
                 constraint = report_graph.value(r, SH.sourceConstraintComponent)
                 severity = report_graph.value(r, SH.resultSeverity)
-
-                
+    
+                # 🔥 NORMALIZACIÓN
                 sev_uri = str(severity)
-                
+    
                 if "Violation" in sev_uri:
                     sev_text = "ERROR"
                 elif "Warning" in sev_uri:
                     sev_text = "WARNING"
                 else:
                     sev_text = "INFO"
-                                )
-
+    
+                # 🔥 FILTRO CORRECTO
+                filtro_severidad = st.session_state.get(
+                    "filtro_severidad",
+                    ["ERROR", "WARNING", "INFO"]
+                )
+    
                 if sev_text not in filtro_severidad:
                     continue
-                st.write("DEBUG severity:", sev_uri)
+    
+                # CONTINUACIÓN NORMAL
                 tipo_error = TIPO_ERROR_MAP.get(short_name(constraint), short_name(constraint))
                 path_legible = short_name(path)
-
+    
                 resumen_path[path_legible] += 1
                 resumen_tipo[tipo_error]["total"] += 1
                 resumen_tipo[tipo_error]["paths"].add(path_legible)
-
+    
                 types = list(data_graph.objects(focus, RDF.type))
+    
+                # 🔥 CORRECCIÓN CLASE
                 clase = "Desconocido"
+    
                 for t in types:
                     t_str = str(t)
-                if "dcat" in t_str.lower():
-                    clase = short_name(t)
-                    break
-
+                    if "dcat" in t_str.lower():
+                        clase = short_name(t)
+                        break
+    
                 if clase == "Desconocido" and types:
                     clase = short_name(types[0])
-
+    
                 errores_por_clase[clase].append({
                     "Severidad": sev_text,
                     "Tipo de error": tipo_error,
@@ -385,60 +386,64 @@ if st.session_state["run_validation"]:
                     "Valor": obtener_valor_metadato(data_graph, focus, path, value),
                     "FocusNode": str(focus)
                 })
-
-            
-            # Tablas detalladas
+    
+            # --------------------------------------------------------
+            # TABLAS (IGUAL QUE TU CÓDIGO)
+            # --------------------------------------------------------
             st.subheader("📊 Resumen por Metadato")
-            
-            df_path = pd.DataFrame([{"Metadato": k, "Total errores": v} for k, v in resumen_path.items()])
-            
+    
+            df_path = pd.DataFrame([
+                {"Metadato": k, "Total errores": v}
+                for k, v in resumen_path.items()
+            ])
+    
             if df_path.empty:
                 st.info("No hay datos para mostrar en el resumen por metadato")
             else:
                 df_path.index += 1
                 st.dataframe(df_path, use_container_width=True)
-            
-            
+    
             st.subheader("📊 Resumen por Tipo de Error")
-            
-            df_tipo = pd.DataFrame([{
-                "Tipo de Error": t,
-                "Errores únicos (metadatos)": len(v["paths"]),
-                "Total Errores": v["total"]
-            } for t, v in resumen_tipo.items()])
-            
+    
+            df_tipo = pd.DataFrame([
+                {
+                    "Tipo de Error": t,
+                    "Errores únicos (metadatos)": len(v["paths"]),
+                    "Total Errores": v["total"]
+                }
+                for t, v in resumen_tipo.items()
+            ])
+    
             if df_tipo.empty:
                 st.info("No hay datos para mostrar en el resumen por tipo de error")
             else:
                 df_tipo.index += 1
                 st.dataframe(df_tipo, use_container_width=True)
-            
-            
+    
             clases_disponibles = sorted(errores_por_clase.keys())
-            
+    
             st.markdown("---")
             st.header("🎛️ Filtro por Clase")
-            
+    
             clase_seleccionada = st.selectbox(
                 "Selecciona una clase:",
                 ["Todas"] + clases_disponibles
             )
-                
+    
             st.subheader("📋 Detalle de Errores por Clase")
-                
-
+    
             if clase_seleccionada == "Todas":
                 clases_a_mostrar = errores_por_clase.items()
             else:
                 clases_a_mostrar = [
                     (clase_seleccionada, errores_por_clase.get(clase_seleccionada, []))
                 ]
-            
+    
             for clase, errores_lista in clases_a_mostrar:
                 st.markdown(f"### 🧱 Clase: `{clase}`")
-            
+    
                 df_det = pd.DataFrame(errores_lista)
-            
+    
                 if df_det.empty:
                     st.info("Sin errores en esta clase")
                 else:
