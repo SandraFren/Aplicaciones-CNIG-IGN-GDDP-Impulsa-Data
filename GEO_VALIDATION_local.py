@@ -375,7 +375,14 @@ if st.session_state["run_validation"]:
                     "FocusNode": str(focus)
                 })
 
+            clases_disponibles = sorted(errores_por_clase.keys())
+            st.markdown("---")
+            st.header("🎛️ Filtro por Clase")
             
+            clase_seleccionada = st.selectbox(
+                "Selecciona una clase:",
+                ["Todas"] + clases_disponibles
+            )
             # Tablas detalladas
             st.subheader("📊 Resumen por Metadato")
             
@@ -405,16 +412,21 @@ if st.session_state["run_validation"]:
             
             st.subheader("📋 Detalle de Errores por Clase")
             
-            if not errores_por_clase:
-                st.info("No hay errores para mostrar")
+
+            if clase_seleccionada == "Todas":
+                clases_a_mostrar = errores_por_clase.items()
             else:
-                for clase, errores_lista in errores_por_clase.items():
-                    st.markdown(f"### 🧱 Clase: `{clase}`")
+                clases_a_mostrar = [
+                    (clase_seleccionada, errores_por_clase.get(clase_seleccionada, []))
+                ]
             
-                    df_det = pd.DataFrame(errores_lista)
+            for clase, errores_lista in clases_a_mostrar:
+                st.markdown(f"### 🧱 Clase: `{clase}`")
             
-                    if df_det.empty:
-                        st.info("Sin errores en esta clase")
-                    else:
-                        df_det.index += 1
-                        st.dataframe(df_det, use_container_width=True)
+                df_det = pd.DataFrame(errores_lista)
+            
+                if df_det.empty:
+                    st.info("Sin errores en esta clase")
+                else:
+                    df_det.index += 1
+                    st.dataframe(df_det, use_container_width=True)
