@@ -355,8 +355,16 @@ if st.session_state["run_validation"]:
                 resumen_tipo[tipo_error]["total"] += 1
                 resumen_tipo[tipo_error]["paths"].add(path_legible)
 
-                types = list(report_graph.objects(focus, RDF.type))
-                clase = short_name(types[0]) if types else "Desconocido"
+                types = list(data_graph.objects(focus, RDF.type))
+                clase = "Desconocido"
+                for t in types:
+                    t_str = str(t)
+                if "dcat" in t_str.lower():
+                    clase = short_name(t)
+                    break
+
+                if clase == "Desconocido" and types:
+                    clase = short_name(types[0])
 
                 errores_por_clase[clase].append({
                     "Severidad": sev_text,
@@ -383,8 +391,17 @@ if st.session_state["run_validation"]:
             st.dataframe(df_tipo)
 
             st.subheader("📋 Detalle de Errores por Clase")
-            for clase, errores_lista in errores_por_clase.items():
-                st.markdown(f"### 🧱 Clase: `{clase}`")
-                df_det = pd.DataFrame(errores_lista)
-                df_det.index += 1
-                st.dataframe(df_det, width='content')
+            
+            if not errores_por_clase:
+                st.info("No hay errores para mostrar")
+            else:
+                for clase, errores_lista in errores_por_clase.items():
+                    st.markdown(f"### 🧱 Clase: `{clase}`")
+            
+                    df_det = pd.DataFrame(errores_lista)
+            
+                    if df_det.empty:
+                        st.info("Sin errores en esta clase")
+                    else:
+                        df_det.index += 1
+                        st.dataframe(df_det, use_container_width=True)
