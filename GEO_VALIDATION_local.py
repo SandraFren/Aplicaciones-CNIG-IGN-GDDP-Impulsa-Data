@@ -126,6 +126,7 @@ with top2:
 
 if reset:
     st.session_state["run_validation"] = False
+    st.session_state["results"] = None
     for key in list(st.session_state.keys()):
         if key not in ["run_validation", "file_uploader_counter"]:
             del st.session_state[key]
