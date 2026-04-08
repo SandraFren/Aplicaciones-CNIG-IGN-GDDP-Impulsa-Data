@@ -262,23 +262,23 @@ if st.session_state["run_validation"]:
     # ------------------------------------------------------------
     # FILTRO DE SEVERIDAD
     # ------------------------------------------------------------
-    st.markdown("---")
-    st.header("🎛️ Filtro de Severidad")
-
-    filtro = st.radio(
-        "Filtrar por:",
-        ["Todos", "Solo errores", "Solo warnings", "Solo info"]
-    )
-    
-    if filtro == "Todos":
-        filtro_severidad = ["ERROR", "WARNING", "INFO"]
-    elif filtro == "Solo errores":
-        filtro_severidad = ["ERROR"]
-    elif filtro == "Solo warnings":
-        filtro_severidad = ["WARNING"]
-    else:
-        filtro_severidad = ["INFO"]
-
+        st.markdown("---")
+        st.header("🎛️ Filtro de Severidad")
+        
+        filtro = st.radio(
+            "Filtrar por:",
+            ["Todos", "Solo errores", "Solo warnings", "Solo info"]
+        )
+        
+        # Mapear a valores internos
+        if filtro == "Todos":
+            filtro_severidad = ["ERROR", "WARNING", "INFO"]
+        elif filtro == "Solo errores":
+            filtro_severidad = ["ERROR"]
+        elif filtro == "Solo warnings":
+            filtro_severidad = ["WARNING"]
+        else:
+            filtro_severidad = ["INFO"]
     #-----------------------------------------------------------
     # RESULTADOS DETALLADOS POR RDF
     # ------------------------------------------------------------
@@ -336,15 +336,20 @@ if st.session_state["run_validation"]:
                 constraint = report_graph.value(r, SH.sourceConstraintComponent)
                 severity = report_graph.value(r, SH.resultSeverity)
 
-                sev_text = (
-                    "ERROR" if severity == SH.Violation
-                    else "WARNING" if severity == SH.Warning
-                    else "INFO"
-                )
+                
+                sev_uri = str(severity)
+                
+                if "Violation" in sev_uri:
+                    sev_text = "ERROR"
+                elif "Warning" in sev_uri:
+                    sev_text = "WARNING"
+                else:
+                    sev_text = "INFO"
+                                )
 
                 if sev_text not in filtro_severidad:
                     continue
-
+                st.write("DEBUG severity:", sev_uri)
                 tipo_error = TIPO_ERROR_MAP.get(short_name(constraint), short_name(constraint))
                 path_legible = short_name(path)
 
@@ -372,7 +377,7 @@ if st.session_state["run_validation"]:
                     "FocusNode": str(focus)
                 })
 
-
+            
             # Tablas detalladas
             st.subheader("📊 Resumen por Metadato")
             
