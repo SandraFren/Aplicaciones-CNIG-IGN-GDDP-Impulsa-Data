@@ -8,7 +8,7 @@ from rdflib import RDF, Namespace, URIRef, Literal, BNode, Graph
 from pyshacl import validate
 import streamlit as st
 import pandas as pd
-
+import os
 # ------------------------------------------------------------
 # CONSTANTES
 # ------------------------------------------------------------
@@ -16,8 +16,6 @@ FORMAT_MAP = {
     ".ttl": "turtle",
     ".rdf": "xml",
     ".xml": "xml",
-    ".nt": "nt",
-    ".n3": "n3",
     ".jsonld": "json-ld"
 }
 
@@ -33,6 +31,12 @@ TIPO_ERROR_MAP = {
     "AndConstraintComponent": "Condición AND",
     "XoneConstraintComponent": "Condición XOR",
     "NotConstraintComponent": "Condición NOT"
+}
+BASE_DIR_SHACL = "validacion"
+
+VALIDACIONES = {
+    "DCAT-AP-ES": "nohvd",
+    "DCAT-AP-ES-HVD": ["nohvd", "hvd"]
 }
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
@@ -105,7 +109,7 @@ def validar_rdf_individual(rdf_file, shapes_graph):
 # CONFIGURACIÓN STREAMLIT
 # ------------------------------------------------------------
 st.set_page_config(page_title="Validador SHACL", layout="wide")
-st.title("🗺️ Validador SHACL - GeoDCAT-AP - CNIG")
+st.title("Validador SHACL- DCAT-AP-ES - Proyecto GDDP")
 
 # Inicializar estado
 if "run_validation" not in st.session_state:
@@ -138,11 +142,11 @@ DATA_FILE = st.file_uploader(
     key=f"data_file_{st.session_state['file_uploader_counter']}"
 )
 
-SHAPES_FILE = st.file_uploader(
-    "📘 Subir Shapes SHACL",
-    type=["ttl"],
-    accept_multiple_files=True,
-    key=f"shapes_file_{st.session_state['file_uploader_counter']}"
+st.markdown("📘 Seleccionar validación SHACL")
+
+opcion_validacion = st.selectbox(
+    "Elige un conjunto de validaciones:",
+    list(VALIDACIONES.keys())
 )
 
 run_validation = st.button("🚀 Ejecutar validación")
@@ -158,16 +162,32 @@ if st.session_state["run_validation"]:
     # Guardar resultados solo si no están ya en sesión
     if "results" not in st.session_state:
 
-        if not DATA_FILE or not SHAPES_FILE:
+        if not DATA_FILE:
             st.warning("⚠️ Debes subir RDF y Shapes antes de validar")
             st.stop()
 
-        # Cargar shapes
-        shapes_graph = Graph()
-        with st.spinner("📘 Cargando Shapes SHACL..."):
-            for shacl_file in SHAPES_FILE:
-                shapes_graph.parse(data=shacl_file.getvalue(), format="turtle")
 
+
+# Cargar shapes desde carpetas github
+shapes_graph = Graph()
+
+with st.spinner("📘 Cargando Shapes SHACL..."):
+
+    seleccion = VALIDACIONES[opcion_validacion]
+
+    # Convertir a lista si es solo una carpeta
+    if isinstance(seleccion, list):
+        carpetas = seleccion
+    else:
+        carpetas = [seleccion]
+
+    for carpeta in carpetas:
+        ruta_carpeta = os.path.join(BASE_DIR, carpeta)
+
+        for archivo in os.listdir(ruta_carpeta):
+            if archivo.endswith(".ttl"):
+                ruta = os.path.join(ruta_carpeta, archivo)
+                shapes_graph.parse(ruta, format="turtle")
         # Validar secuencialmente con barra de progreso
         results = []
         progress = st.progress(0, text="⏳ Iniciando validación...")
