@@ -375,21 +375,34 @@ if st.session_state["run_validation"]:
                     "FocusNode": str(focus)
                 })
 
+            
             # Tablas detalladas
             st.subheader("📊 Resumen por Metadato")
+            
             df_path = pd.DataFrame([{"Metadato": k, "Total errores": v} for k, v in resumen_path.items()])
-            df_path.index += 1
-            st.dataframe(df_path)
-
+            
+            if df_path.empty:
+                st.info("No hay datos para mostrar en el resumen por metadato")
+            else:
+                df_path.index += 1
+                st.dataframe(df_path, use_container_width=True)
+            
+            
             st.subheader("📊 Resumen por Tipo de Error")
+            
             df_tipo = pd.DataFrame([{
                 "Tipo de Error": t,
                 "Errores únicos (metadatos)": len(v["paths"]),
                 "Total Errores": v["total"]
             } for t, v in resumen_tipo.items()])
-            df_tipo.index += 1
-            st.dataframe(df_tipo)
-
+            
+            if df_tipo.empty:
+                st.info("No hay datos para mostrar en el resumen por tipo de error")
+            else:
+                df_tipo.index += 1
+                st.dataframe(df_tipo, use_container_width=True)
+            
+            
             st.subheader("📋 Detalle de Errores por Clase")
             
             if not errores_por_clase:
