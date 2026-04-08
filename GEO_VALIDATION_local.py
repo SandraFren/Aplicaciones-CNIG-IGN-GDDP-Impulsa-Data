@@ -423,8 +423,10 @@ if st.session_state["run_validation"]:
     
             clase_seleccionada = st.selectbox(
                 "Selecciona una clase:",
-                ["Todas"] + clases_disponibles
+                ["Todas"] + clases_disponibles,
+                key=f"select_clase_{rdf_name}"
             )
+            
     
             st.subheader("📋 Detalle de Errores por Clase")
     
