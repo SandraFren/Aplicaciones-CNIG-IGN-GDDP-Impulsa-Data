@@ -270,15 +270,24 @@ if st.session_state["run_validation"]:
             ["Todos", "Solo errores", "Solo warnings", "Solo info"]
         )
         
-        # Mapear a valores internos
-        if filtro == "Todos":
-            filtro_severidad = ["ERROR", "WARNING", "INFO"]
-        elif filtro == "Solo errores":
-            filtro_severidad = ["ERROR"]
-        elif filtro == "Solo warnings":
-            filtro_severidad = ["WARNING"]
-        else:
-            filtro_severidad = ["INFO"]
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            if st.button("Todos"):
+                st.session_state["filtro_severidad"] = ["ERROR", "WARNING", "INFO"]
+        
+        with col2:
+            if st.button("❌ Errores"):
+                st.session_state["filtro_severidad"] = ["ERROR"]
+        
+        with col3:
+            if st.button("⚠️ Warnings"):
+                st.session_state["filtro_severidad"] = ["WARNING"]
+        
+        with col4:
+            if st.button("ℹ️ Info"):
+                st.session_state["filtro_severidad"] = ["INFO"]
+🔧
     #-----------------------------------------------------------
     # RESULTADOS DETALLADOS POR RDF
     # ------------------------------------------------------------
@@ -327,7 +336,7 @@ if st.session_state["run_validation"]:
             errores_por_clase = defaultdict(list)
             resumen_path = defaultdict(int)
             resumen_tipo = defaultdict(lambda: {"total": 0, "paths": set()})
-
+            
             for r in report_graph.subjects(RDF.type, SH.ValidationResult):
                 focus = report_graph.value(r, SH.focusNode)
                 path = report_graph.value(r, SH.resultPath)
