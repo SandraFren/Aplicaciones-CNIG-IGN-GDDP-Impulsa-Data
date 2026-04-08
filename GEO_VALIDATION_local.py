@@ -35,8 +35,8 @@ TIPO_ERROR_MAP = {
 BASE_DIR_SHACL = "validacion"
 
 VALIDACIONES = {
-    "DCAT-AP-ES": "nohvd",
-    "DCAT-AP-ES-HVD": ["nohvd", "hvd"]
+    "DCAT-AP-ES": "DCAT-AP-ES",
+    "DCAT-AP-ES-HVD": ["DCAT-AP-ES", "DCAT-AP-ES-HVD"]
 }
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
