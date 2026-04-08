@@ -32,7 +32,7 @@ TIPO_ERROR_MAP = {
     "XoneConstraintComponent": "Condición XOR",
     "NotConstraintComponent": "Condición NOT"
 }
-BASE_DIR_SHACL = "validacion"
+BASE_DIR_SHACL = "Validacion"
 
 VALIDACIONES = {
     "DCAT-AP-ES": "DCAT-AP-ES",
