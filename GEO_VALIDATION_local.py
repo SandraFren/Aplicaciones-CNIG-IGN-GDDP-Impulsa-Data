@@ -157,7 +157,7 @@ if run_validation:
 # ------------------------------------------------------------
 # VALIDACIÓN (solo si fue solicitada)
 # ------------------------------------------------------------
-if st.session_state["run_validation"]:
+if st.session_state["run_validation"] and st.session_state["results"] is None:
 
     # Guardar resultados solo si no están ya en sesión
     if "results" not in st.session_state:
