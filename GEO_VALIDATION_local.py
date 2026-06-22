@@ -38,7 +38,8 @@ BASE_DIR_SHACL = "Validacion"
 
 VALIDACIONES = {
     "DCAT-AP-ES": "DCAT-AP-ES",
-    "DCAT-AP-ES-HVD": ["DCAT-AP-ES", "DCAT-AP-ES-HVD"]
+    "DCAT-AP-ES-HVD": ["DCAT-AP-ES", "DCAT-AP-ES-HVD"],
+    "GEODCAT-AP": ["GEODCAT-AP"]
 }
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
