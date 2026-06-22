@@ -3,3 +3,4 @@ pyshacl
 streamlit
 pandas
 matplotlib
+saxonche
